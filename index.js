@@ -31,31 +31,30 @@ app.get("/", (req, res) => {
   res.send("Ok – Servidor disponível.");//vai p browser
 });
 
-app.get("/usuarios", (req, res) => {
+app.get("/familias", (req, res) => {
   try {
-    client.query("SELECT * FROM Usuarios", function (err, result) {
+    client.query("SELECT * FROM familias", function (err, result) {
       if (err) {
         return console.error("Erro ao executar a qry de SELECT", err);
       }
       res.send(result.rows);
-      console.log("Rota: get usuarios");
+      console.log("Rota: get familias");
     });
   } catch (error) {
     console.log(error);
   }
 });
 
-app.get("/usuarios/:id", (req, res) => {
+app.get("/familias/:id", (req, res) => {
   try {
-    console.log("Rota: usuarios/" + req.params.id);
+    console.log("Rota: familias/" + req.params.id);
     client.query(
-      "SELECT * FROM Usuarios WHERE id = $1", [req.params.id],
+      "SELECT * FROM familias WHERE id = $1", [req.params.id],
       (err, result) => {
         if (err) {
           return console.error("Erro ao executar a qry de SELECT id", err);
         }
         res.send(result.rows);
-        //console.log(result);
       }
     );
   } catch (error) {
@@ -63,11 +62,11 @@ app.get("/usuarios/:id", (req, res) => {
   }
 });
 
-app.delete("/usuarios/:id", (req, res) => {
+app.delete("/familias/:id", (req, res) => {
   try {
     console.log("Rota: delete/" + req.params.id);
     client.query(
-      "DELETE FROM Usuarios WHERE id = $1", [req.params.id], (err, result) => {
+      "DELETE FROM familias WHERE id = $1", [req.params.id], (err, result) => {
         if (err) {
           return console.error("Erro ao executar a qry de DELETE", err);
         } else {
@@ -85,12 +84,13 @@ app.delete("/usuarios/:id", (req, res) => {
   }
 });
 
-app.post("/usuarios", (req, res) => {
+app.post("/familias", (req, res) => {
   try {
     console.log("Alguém enviou um post com os dados:", req.body);
-    const { nome, email, altura, peso } = req.body;
+    const { voce, pai, mae, avo_paterno, avo_materno, ava_materno, ava_paterno } = req.body;
     client.query(
-      "INSERT INTO Usuarios (nome, email, altura, peso) VALUES ($1, $2, $3, $4) RETURNING * ", [nome, email, altura, peso],
+      "INSERT INTO familias (voce, pai, mae, avo_paterno, avo_materno, ava_materno, ava_paterno) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING * ", 
+      [voce, pai, mae, avo_paterno, avo_materno, ava_materno, ava_paterno],
       (err, result) => {
         if (err) {
           return console.error("Erro ao executar a qry de INSERT", err);
@@ -106,14 +106,14 @@ app.post("/usuarios", (req, res) => {
   }
 });
 
-app.put("/usuarios/:id", (req, res) => {
+app.put("/familias/:id", (req, res) => {
   try {
     console.log("Alguém enviou um update com os dados:", req.body);
     const id = req.params.id;
-    const { nome, email, altura, peso } = req.body;
+    const { voce, pai, mae, avo_paterno, avo_materno, ava_materno, ava_paterno } = req.body;
     client.query(
-      "UPDATE Usuarios SET nome=$1, email=$2, altura=$3, peso=$4 WHERE id =$5 ",
-      [nome, email, altura, peso, id],
+      "UPDATE familias SET voce=$1, pai=$2, mae=$3, avo_paterno=$4, avo_materno=$5, ava_materno=$6, ava_paterno=$7 WHERE id=$8",
+      [voce, pai, mae, avo_paterno, avo_materno, ava_materno, ava_paterno, id],
       (err, result) => {
         if (err) {
           return console.error("Erro ao executar a qry de UPDATE", err);
@@ -128,25 +128,6 @@ app.put("/usuarios/:id", (req, res) => {
     console.error(erro);
   }
 });
-
-app.post('/questionario', (req, res) => {
-  try {
-    console.log("Alguém enviou um post com os dados:", req.body);
-    const { q1, q2, q3, q4, q5 } = req.body;
-    client.query(
-      "INSERT INTO questionario (q1, q2, q3, q4, q5) VALUES ($1, $2, $3, $4, $5) RETURNING * ", [q1, q2, q3, q4, q5],
-      (err, result) => {
-        if (err) {
-          return console.error("Erro ao executar a qry de INSERT no questionario", err);
-        }
-        res.status(201).json(result.rows[0]);
-        console.log(result);
-      }
-    );
-  } catch (erro) {
-    console.error(erro);
-  }
-})
 
 app.listen(config.port, () =>
   console.log("Servidor funcionando na porta " + config.port)
